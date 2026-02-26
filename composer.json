@@ -1,8 +1,8 @@
 {
     "name": "daniardev/laravel-core",
-    "description": "Private Laravel Core Package - Reusable Helpers, Traits, and Patterns",
+    "description": "Reusable Laravel Core Package - Helpers, Traits, and Patterns for consistent code structure",
     "type": "library",
-    "license": "proprietary",
+    "license": "MIT",
     "keywords": [
         "laravel",
         "helpers",
