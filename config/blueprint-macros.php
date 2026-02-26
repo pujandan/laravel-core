@@ -25,6 +25,7 @@ Blueprint::macro('auditFields', function () {
         ->index();
 
     // deleted_by - only if softDeletes is used
+    // Check if deleted_at column exists (must be called AFTER softDeletes())
     $columns = collect($this->getColumns())->pluck('name')->toArray();
     if (in_array('deleted_at', $columns)) {
         $this->foreignUuid('deleted_by')
