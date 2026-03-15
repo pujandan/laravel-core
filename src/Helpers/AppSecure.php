@@ -4,63 +4,98 @@ namespace Daniardev\LaravelTsd\Helpers;
 
 use RuntimeException;
 
+/**
+ * Simple encryption/decryption helper for sensitive data.
+ *
+ * Uses AES-128-CBC encryption with Laravel's APP_KEY.
+ * Suitable for encrypting small values like tokens, IDs, or simple data.
+ *
+ * WARNING: For production use with highly sensitive data,
+ * consider using Laravel's built-in encryption features instead.
+ *
+ * @package Daniardev\LaravelTsd\Helpers
+ */
 class AppSecure
 {
     /**
-     * Get secret key from config.
+     * Get encryption key from Laravel's APP_KEY.
      *
-     * @return string
-     * @throws RuntimeException
+     * Extracts the last 16 characters from APP_KEY for AES-128 encryption.
+     *
+     * @return string 16-character encryption key
+     * @throws RuntimeException If APP_KEY is not configured
      */
     private static function secretKey(): string
     {
         $key = config('app.key');
 
-        if (!$key) {
-            throw new RuntimeException('Encryption key not configured. Please set APP_KEY in your .env file.');
+        if (empty($key)) {
+            throw new RuntimeException(
+                'Encryption key not configured. Please set APP_KEY in your .env file ' .
+                'or run: php artisan key:generate'
+            );
         }
 
+        // Use last 16 characters for AES-128
         return substr($key, -16);
     }
 
     /**
-     * Encrypt value using AES-128-CBC.
+     * Encrypt a string value using AES-128-CBC encryption.
      *
-     * @param string $value Value to encrypt
-     * @return string Base64 encoded encrypted value
-     * @throws RuntimeException
+     * The encrypted value is base64 encoded for safe storage/transmission.
+     *
+     * Usage:
+     * ```php
+     * $encrypted = AppSecure::encrypt('user_id_123');
+     * // Returns: "U2FsdGVkX1..."
+     * ```
+     *
+     * @param string $value The plain text value to encrypt
+     * @return string Base64 encoded encrypted string
+     * @throws RuntimeException If encryption fails
      */
     public static function encrypt(string $value): string
     {
         $key = self::secretKey();
-        $iv = str_repeat("\0", 16);
+        $iv = str_repeat("\0", 16); // Zero IV for simplicity (NOT recommended for production)
         $method = 'aes-128-cbc';
-        $encryptedString = openssl_encrypt($value, $method, $key, OPENSSL_RAW_DATA, $iv);
 
-        if ($encryptedString === false) {
-            throw new RuntimeException('Encryption failed.');
+        $encrypted = openssl_encrypt($value, $method, $key, OPENSSL_RAW_DATA, $iv);
+
+        if ($encrypted === false) {
+            throw new RuntimeException('Encryption failed. Please check that the openssl extension is enabled.');
         }
 
-        return base64_encode($encryptedString);
+        return base64_encode($encrypted);
     }
 
     /**
-     * Decrypt value using AES-128-CBC.
+     * Decrypt a previously encrypted string value.
      *
-     * @param string $encoded Base64 encoded encrypted value
-     * @return string Decrypted value
-     * @throws RuntimeException
+     * Decodes the base64 input and decrypts using AES-128-CBC.
+     *
+     * Usage:
+     * ```php
+     * $decrypted = AppSecure::decrypt($encrypted);
+     * // Returns: "user_id_123"
+     * ```
+     *
+     * @param string $encoded Base64 encoded encrypted string
+     * @return string The decrypted plain text value
+     * @throws RuntimeException If decryption fails
      */
     public static function decrypt(string $encoded): string
     {
         $key = self::secretKey();
-        $iv = str_repeat("\0", 16);
+        $iv = str_repeat("\0", 16); // Zero IV for simplicity (NOT recommended for production)
         $method = 'aes-128-cbc';
-        $base64 = base64_decode($encoded);
-        $decrypted = openssl_decrypt($base64, $method, $key, OPENSSL_RAW_DATA, $iv);
+
+        $decoded = base64_decode($encoded);
+        $decrypted = openssl_decrypt($decoded, $method, $key, OPENSSL_RAW_DATA, $iv);
 
         if ($decrypted === false) {
-            throw new RuntimeException('Decryption failed.');
+            throw new RuntimeException('Decryption failed. The data may be corrupted or encrypted with a different key.');
         }
 
         return $decrypted;
