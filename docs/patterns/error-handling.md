@@ -63,8 +63,43 @@ AppHandler
 
 1. **Generic & Global** - Works with any exception type, not hard-coded specific exceptions
 2. **Status Code Based** - Uses HTTP status codes (4xx vs 5xx) for log level determination
-3. **Separation of Concerns** - Logging in `configure()`, Rendering in `render()`
-4. **Laravel Native** - Uses Laravel's default HTML rendering for web requests
+3. **Separation of Concerns** - Logging and rendering both in `configure()` via callbacks
+4. **Laravel Native** - Returns `null` for web requests to let Laravel's default renderer handle HTML pages
+
+### How It Works
+
+`AppHandler::configure()` registers two callbacks with Laravel's exception system:
+
+```php
+public static function configure(Exceptions $exceptions): void
+{
+    // 1. Logging callback (report)
+    $exceptions->report(function (Throwable $e) {
+        // Log 401/403 as WARNING
+        // Log 500+ as ERROR
+        // Skip 404/422/429 etc.
+    });
+
+    // 2. Rendering callback (render)
+    $exceptions->render(function (Throwable $e, Request $request) {
+        // API requests → Return JSON
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return static::renderException($e);
+        }
+
+        // Web requests → Return null (let Laravel handle HTML)
+        return null;
+    });
+}
+```
+
+**Why return `null` for web requests?**
+
+Returning `null` from the render callback tells Laravel to use its default exception renderer, which produces beautiful HTML error pages with stack traces (in debug mode) or simple error pages (in production).
+
+**Why `throw $e` doesn't work?**
+
+Throwing the exception inside the render callback causes Laravel to display a plain text stack trace instead of its formatted HTML error pages.
 
 ---
 
