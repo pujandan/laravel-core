@@ -531,7 +531,9 @@ Quick reference for available helper methods. See `quick-reference.md` Section 1
 - `isAllow($feature)` - Check permission
 
 ### AppSecure
-- `encrypt()` / `decrypt()` - Encryption
+- `encrypt($value)` - Encrypt using AES-256-CBC with random IV
+- `decrypt($encoded)` - Decrypt base64 encoded (IV + ciphertext)
+- `getKeyForFlutter()` - Get encryption key for Flutter config
 
 ---
 

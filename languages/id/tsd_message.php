@@ -41,4 +41,11 @@ return [
     // Auth & Validation Messages
     'invalidLogin' => 'Username atau Password tidak valid.',
     'successLogin' => 'Detail login berhasil.',
+
+    // AppSecure Encryption/Decryption Messages
+    'secureKeyNotConfigured' => 'Kunci enkripsi tidak dikonfigurasi. Silakan set APP_KEY di file .env atau jalankan: php artisan key:generate',
+    'secureKeyTooShort' => 'APP_KEY harus minimal 32 karakter untuk enkripsi AES-256. Panjang saat ini: :length. Jalankan: php artisan key:generate',
+    'secureEncryptionFailed' => 'Enkripsi gagal. Silakan periksa apakah ekstensi openssl telah diaktifkan.',
+    'secureDecryptionInvalidFormat' => 'Dekripsi gagal. Format data terenkripsi tidak valid.',
+    'secureDecryptionFailed' => 'Dekripsi gagal. Data mungkin rusak, dienkripsi dengan kunci yang berbeda, atau dari aplikasi yang berbeda.',
 ];

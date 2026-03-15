@@ -41,4 +41,11 @@ return [
     // Auth & Validation Messages
     'invalidLogin' => 'Username or Password invalid.',
     'successLogin' => 'User logged in successfully.',
+
+    // AppSecure Encryption/Decryption Messages
+    'secureKeyNotConfigured' => 'Encryption key not configured. Please set APP_KEY in your .env file or run: php artisan key:generate',
+    'secureKeyTooShort' => 'APP_KEY must be at least 32 characters long for AES-256 encryption. Current length: :length. Run: php artisan key:generate',
+    'secureEncryptionFailed' => 'Encryption failed. Please check that the openssl extension is enabled.',
+    'secureDecryptionInvalidFormat' => 'Decryption failed. Invalid encrypted data format.',
+    'secureDecryptionFailed' => 'Decryption failed. The data may be corrupted, encrypted with a different key, or from a different app.',
 ];

@@ -1772,12 +1772,34 @@ if (AppPermission::isAllow('users.create')) {
 
 ### 16.9 AppSecure
 
-Encryption/decryption helper.
+AES-256-CBC encryption/decryption helper compatible with Flutter/Dart.
 
 | Method | Parameters | Returns | Description |
 |--------|------------|---------|-------------|
-| `encrypt()` | `string $value` | `string` | Encrypt value using APP_KEY |
-| `decrypt()` | `string $encoded` | `string` | Decrypt encrypted value |
+| `encrypt()` | `string $value` | `string` | Encrypt using AES-256-CBC with random IV |
+| `decrypt()` | `string $encoded` | `string` | Decrypt base64 encoded (IV + ciphertext) |
+| `getKeyForFlutter()` | - | `string` | Get encryption key for Flutter config |
+
+**Usage:**
+```php
+use Daniardev\LaravelTsd\Helpers\AppSecure;
+
+// Encrypt
+$encrypted = AppSecure::encrypt('sensitive_data');
+
+// Decrypt
+$decrypted = AppSecure::decrypt($encrypted);
+
+// Get key for Flutter
+$key = AppSecure::getKeyForFlutter();
+```
+
+**Cross-Platform Format:** `BASE64(IV + CIPHERTEXT)`
+- IV: 16 bytes (random)
+- Ciphertext: variable length
+- Both Laravel and Flutter use same key (first 32 chars of APP_KEY)
+
+*See [Flutter Encryption Guide](../patterns/flutter-encryption-guide.md) and [Locale Guide](../patterns/appsecure-locale-guide.md) for details.*
 
 ### 16.10 AppSafe
 
