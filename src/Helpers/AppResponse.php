@@ -38,7 +38,7 @@ class AppResponse
         ];
 
         // Convert resource to array if provided
-        $array = $data? $data->toArray(new Request()) : null;
+        $array = $data?->toArray(new Request());
 
         // Handle paginated responses (includes 'data', 'meta', 'links' keys)
         if ($array !== null && isset($array['data'])) {

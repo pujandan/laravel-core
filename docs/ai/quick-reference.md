@@ -1655,15 +1655,65 @@ public function toArray(Request $request): array
 
 ### 16.4 AppResponse
 
-Response formatting helper.
+Standardized JSON response formatter for API endpoints.
 
 | Method | Parameters | Returns | Description |
 |--------|------------|---------|-------------|
-| `success()` | `?JsonResource $data, ?string $message = null` | `JsonResponse` | Success response |
-| `error()` | `?string $message, int $code = 404, ?JsonResource $error = null` | `JsonResponse` | Error response |
-| `print()` | `?string $message, array $data = []` | `JsonResponse` | Simple print response |
-| `selectionEnums()` | `string $enumClass, string $key, ?string $type = null` | `Collection` | Format enums as selection |
-| `selection()` | `Collection $items, string $key, string $value, ?string $type = null` | `Collection` | Format collection as selection |
+| `success()` | `?JsonResource $data, ?string $message = null` | `JsonResponse` | Success response with optional data |
+| `error()` | `?string $message, int $code = 404, ?JsonResource $error = null` | `JsonResponse` | Error response with status code |
+| `print()` | `?string $message, array $data = []` | `JsonResponse` | Simple response without code field |
+| `selectionEnums()` | `string $enumClass, string $key, ?string $type = null` | `Collection` | Format enum cases as dropdown selection |
+| `selection()` | `Collection $items, string $key, string $value = 'label', ?string $type = null` | `Collection` | Format collection as dropdown selection |
+
+**Response Formats:**
+
+```php
+// Success response
+AppResponse::success($resource, 'Data saved successfully');
+// Returns: {"code": 200, "message": "Data saved successfully", "data": {...}}
+
+// Success with pagination (auto-detected)
+AppResponse::success($paginatedResource, 'Data retrieved');
+// Returns: {"code": 200, "message": "Data retrieved", "data": {...}, "meta": {...}, "links": {...}}
+
+// Error response
+AppResponse::error('Not found', 404);
+// Returns: {"code": 404, "message": "Not found"}
+
+// Print response (no code field)
+AppResponse::print('Operation completed', ['count' => 5]);
+// Returns: {"message": "Operation completed", "data": {"count": 5}}
+
+// Selection dropdown
+AppResponse::selection(StatusEnum::class, 'status');
+// Returns: [{"key": "status", "type": "dropdown", "values": [{"id": null, "label": "All"}, {"id": "active", "label": "Active"}, ...]}]
+```
+
+**Usage Examples:**
+
+```php
+// In Controller - Success
+public function store(UserFormRequest $request)
+{
+    $user = $this->service->create($request->validated());
+    return AppResponse::success(UserResource::make($user), __('User created successfully'));
+}
+
+// In Controller - Error (from AppHandler)
+public static function renderException(Throwable $e): JsonResponse
+{
+    if ($e instanceof AuthenticationException) {
+        return AppResponse::error(__('Unauthenticated'), 401);
+    }
+    // ...
+}
+
+// In Controller - Selection dropdown for filters
+public function filters()
+{
+    return AppResponse::selection(User::all(), 'role', 'name');
+}
+```
 
 ### 16.5 AppValidation
 
